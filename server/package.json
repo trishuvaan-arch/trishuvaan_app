@@ -1,0 +1,32 @@
+{
+  "name": "trishuvaan-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Trishuvaan app (Express + Google Sheets + Razorpay + Vite frontend serve)",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "google-auth-library": "^9.14.2",
+    "google-spreadsheet": "^4.1.1",
+    "googleapis": "^144.0.0",
+    "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7",
+    "razorpay": "^2.9.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Trishuvaan Team",
+  "license": "MIT"
+}
