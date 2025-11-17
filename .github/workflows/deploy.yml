@@ -34,7 +34,7 @@ jobs:
           cd server
           zip -r backend.zip .
 
-      # ---------- UPLOAD FILES TO VPS ----------
+      # ---------- SEND FILES TO VPS ----------
       - name: Upload to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -60,7 +60,6 @@ jobs:
             echo "🟣 Deploying Frontend"
             rm -rf ~/frontend_tmp
             mkdir ~/frontend_tmp
-
             unzip -o frontend.zip -d ~/frontend_tmp
 
             sudo rm -rf /var/www/myapp/*
@@ -69,27 +68,25 @@ jobs:
             # ---------- BACKEND DEPLOY ----------
             echo "🟢 Deploying Backend"
 
-            # Backup .env (if exists)
+            # Backup existing .env
             if [ -f ~/trishuvaan_app/server/.env ]; then
-              cp ~/trishuvaan_app/server/.env ~/env_backup
+              cp ~/trishuvaan_app/server/.env ~/server_env_backup
             fi
 
-            # Clean server folder safely
-            rm -rf ~/trishuvaan_app/server
-            mkdir ~/trishuvaan_app/server
-
-            # Extract backend code
-            unzip -o backend.zip -d ~/trishuvaan_app/server
+            rm -rf ~/trishuvaan_app/server/*
+            
+            echo "📦 Extracting backend.zip"
+            unzip -o ~/ci_cd_uploads/server/backend.zip -d ~/trishuvaan_app/server
 
             # Restore .env
-            if [ -f ~/env_backup ]; then
-              mv ~/env_backup ~/trishuvaan_app/server/.env
+            if [ -f ~/server_env_backup ]; then
+              mv ~/server_env_backup ~/trishuvaan_app/server/.env
             fi
 
             cd ~/trishuvaan_app/server
             npm install
 
-            echo "🔁 Restarting PM2 backend..."
+            echo "🔁 Restarting PM2 Backend..."
             pm2 restart backend || pm2 start index.js --name backend
 
             echo "🌐 Reloading Nginx..."
