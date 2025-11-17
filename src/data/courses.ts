@@ -98,52 +98,7 @@ export const courses: Course[] = [
       },
     ],
   },
-  {
-    id: '3',
-    title: 'SQL Mastery',
-    slug: 'sql-mastery',
-    price: '799',
-    originalPrice: '1999',
-    description: 'Transform Data into Insights — SQL for Modern Analysts and Innovators',
-    startDate: '27th Dec onwards (Sat & Sun - 10:30 AM)',
-    duration: '5 Weeks',
-    mode: 'For First Batch Launching offer - 799/- only',
-    seats: 'Limited Seats/ Weekend only',
-    gradient: 'from-green-500 to-teal-500',
-    image: '/images/coursedetail/sql-mastery.jpg',
-    curriculum: [
-      'Introduction to SQL and Database Fundamentals',
-      'Setting Up Your SQL Environment and Tools',
-      'Understanding Data Models and Relationships',
-      'Retrieving Data with SELECT Queries',
-      'Filtering, Sorting and Limiting Data',
-      'SQL Joins — Combining Data Across Multiple Tables',
-      'Aggregations and Analytics with GROUP BY and HAVING',
-      'Working with Subqueries and Nested Queries',
-      'Database Creation, Modification and Data Updates',
-      'Advanced SQL Functions and Expressions',
-      'Building Analytical Queries for Business Insights',
-      'Finance Analytics with Real-World SQL Scenarios',
-      'Customer, Product and Market Insights using SQL',
-      'Supply Chain and Inventory Analytics using SQL',
-      'Performance Optimization and Query Tuning',
-      'SQL Projects — End-to-End Business Case Studies',
-      'Virtual Internship — Real-World SQL Implementation & Reporting',
-
-    ],
-    features: [
-      'Live Coding Sessions',
-      'Practice Databases',
-      'Certificate',
-      'Placement Support',
-    ],
-    faqs: [
-      {
-        question: 'Which SQL database will we use?',
-        answer: 'We cover MySQL and PostgreSQL, but concepts apply to all SQL databases.',
-      },
-    ],
-  },
+  
   {
     id: '4',
     title: 'PythonX',
@@ -166,7 +121,7 @@ export const courses: Course[] = [
     ],
     faqs: [
       {
-        question: 'Is this suitable for complete beginners?',
+        question: 'Is this suitablefor complete beginners?',
         answer: 'Yes, we start from scratch and build up to advanced topics.',
       },
     ],
