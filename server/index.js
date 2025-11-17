@@ -8,26 +8,42 @@ import multer from "multer";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import { Readable } from "stream";
-import axios from "axios";
-import path from "path";
-import { fileURLToPath } from "url";
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
 /* ----------------------------------------------------
-   Middleware
+   ✅ CORS Configuration (Allow domain + IP)
 ---------------------------------------------------- */
+const allowedOrigins = [
+  "http://68.178.160.4",
+  "https://68.178.160.4",
+  "https://trishuvaan.com",
+  "https://www.trishuvaan.com",
+  "http://localhost:5173" // optional for local dev
+];
+
 app.use(
   cors({
-    origin: "*",
+    origin: function (origin, callback) {
+      // Allow REST tools (curl/Postman) without Origin header
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      console.warn(`🚫 Blocked by CORS: ${origin}`);
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST"],
+    credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+/* ----------------------------------------------------
+   File Upload Configuration (Multer)
+---------------------------------------------------- */
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
@@ -134,35 +150,19 @@ async function uploadToDrive(file) {
 }
 
 /* ----------------------------------------------------
-   🔗 WhatsApp Invite Helper
+   WhatsApp Invite Helper
 ---------------------------------------------------- */
 function getWhatsAppInviteMessage(name, groupId) {
   let inviteLink;
-
   switch (groupId) {
-    case "AI":
-      inviteLink = process.env.WHATSAPP_AI_COURSE;
-      break;
-    case "POWERBI":
-      inviteLink = process.env.WHATSAPP_POWERBI;
-      break;
-    case "SQL":
-      inviteLink = process.env.WHATSAPP_SQL;
-      break;
-    case "PYTHON":
-      inviteLink = process.env.WHATSAPP_PYTHON;
-      break;
-    case "EXCEL":
-      inviteLink = process.env.WHATSAPP_EXCEL;
-      break;
-    case "DATAVERSE":
-      inviteLink = process.env.WHATSAPP_DATAVERSE;
-      break;
-    case "AI_FUSION":
-      inviteLink = process.env.WHATSAPP_AI_FUSION;
-      break;
-    default:
-      inviteLink = process.env.WHATSAPP_AI_COURSE;
+    case "AI": inviteLink = process.env.WHATSAPP_AI_COURSE; break;
+    case "POWERBI": inviteLink = process.env.WHATSAPP_POWERBI; break;
+    case "SQL": inviteLink = process.env.WHATSAPP_SQL; break;
+    case "PYTHON": inviteLink = process.env.WHATSAPP_PYTHON; break;
+    case "EXCEL": inviteLink = process.env.WHATSAPP_EXCEL; break;
+    case "DATAVERSE": inviteLink = process.env.WHATSAPP_DATAVERSE; break;
+    case "AI_FUSION": inviteLink = process.env.WHATSAPP_AI_FUSION; break;
+    default: inviteLink = process.env.WHATSAPP_AI_COURSE;
   }
 
   return `👋 Hi ${name || "Learner"}!
@@ -179,7 +179,6 @@ Stay connected and keep learning! 🚀`;
 ---------------------------------------------------- */
 app.post("/api/apply", upload.single("resume"), async (req, res) => {
   try {
-    console.log("📩 /api/apply hit");
     const { name = "", email = "", mobile = "", position = "" } = req.body;
     const resume = req.file;
 
@@ -198,18 +197,10 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
     };
 
     const success = await appendToSheet("applications", sheetRow, [
-      "Timestamp",
-      "Name",
-      "Email",
-      "Mobile",
-      "Position",
-      "Resume",
-      "Status",
+      "Timestamp", "Name", "Email", "Mobile", "Position", "Resume", "Status",
     ]);
 
     if (!success) throw new Error("Failed to write to applications sheet");
-
-    console.log("✅ Application saved successfully");
 
     const whatsappMessage = getWhatsAppInviteMessage(name, "AI");
 
@@ -229,32 +220,19 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
 ---------------------------------------------------- */
 app.post("/api/contact", async (req, res) => {
   try {
-    console.log("📩 /api/contact hit");
     const { name, email, message } = req.body;
-
     if (!name || !email || !message)
       return res.status(400).json({ success: false, message: "All fields are required" });
 
     const timestamp = new Date().toLocaleString();
-    const row = {
-      Timestamp: timestamp,
-      Name: name,
-      Email: email,
-      Message: message,
-      Status: "NEW",
-    };
+    const row = { Timestamp: timestamp, Name: name, Email: email, Message: message, Status: "NEW" };
 
     const success = await appendToSheet("contacts", row, [
-      "Timestamp",
-      "Name",
-      "Email",
-      "Message",
-      "Status",
+      "Timestamp", "Name", "Email", "Message", "Status",
     ]);
 
     if (!success) throw new Error("Failed to write to contacts sheet");
 
-    console.log("✅ Contact saved successfully");
     res.json({ success: true, message: "Message received successfully" });
   } catch (err) {
     console.error("❌ /api/contact error:", err);
@@ -292,16 +270,8 @@ app.post("/api/create-order", async (req, res) => {
 app.post("/api/verify-payment", async (req, res) => {
   try {
     const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      name,
-      email,
-      mobile,
-      course,
-      groupId,
-      language,
-      amount,
+      razorpay_order_id, razorpay_payment_id, razorpay_signature,
+      name, email, mobile, course, groupId, language, amount,
     } = req.body;
 
     const expected = crypto
@@ -314,32 +284,16 @@ app.post("/api/verify-payment", async (req, res) => {
 
     const timestamp = new Date().toLocaleString();
     const row = {
-      Timestamp: timestamp,
-      Name: name,
-      Email: email,
-      Mobile: mobile,
-      Course: course,
-      Language: language,
-      PaymentId: razorpay_payment_id,
-      Amount: amount,
-      Status: "SUCCESS (Auto Captured)",
+      Timestamp: timestamp, Name: name, Email: email, Mobile: mobile,
+      Course: course, Language: language, PaymentId: razorpay_payment_id,
+      Amount: amount, Status: "SUCCESS (Auto Captured)",
     };
 
     const success = await appendToSheet("enrollments", row, [
-      "Timestamp",
-      "Name",
-      "Email",
-      "Mobile",
-      "Course",
-      "Language",
-      "PaymentId",
-      "Amount",
-      "Status",
+      "Timestamp","Name","Email","Mobile","Course","Language","PaymentId","Amount","Status",
     ]);
 
     if (!success) throw new Error("Failed to append to enrollments sheet");
-
-    console.log("✅ Enrollment recorded successfully");
 
     const whatsappMessage = getWhatsAppInviteMessage(name, groupId || "AI");
 
@@ -355,24 +309,6 @@ app.post("/api/verify-payment", async (req, res) => {
 });
 
 /* ----------------------------------------------------
-   🧪 Test Route
----------------------------------------------------- */
-app.get("/api/test-google-write", async (req, res) => {
-  try {
-    const timestamp = new Date().toLocaleString();
-    await appendToSheet(
-      "test",
-      { Timestamp: timestamp, Message: "Google Sheets connection successful!" },
-      ["Timestamp", "Message"]
-    );
-    res.json({ success: true, message: "✅ Test successful" });
-  } catch (err) {
-    console.error("❌ test-google-write error:", err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-/* ----------------------------------------------------
    Health Check
 ---------------------------------------------------- */
 app.get("/health", (req, res) => {
@@ -380,20 +316,8 @@ app.get("/health", (req, res) => {
 });
 
 /* ----------------------------------------------------
-   🧱 Serve Frontend (Vite build)
----------------------------------------------------- */
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname, "../dist")));
-
-// ✅ FINAL FIX: Express 5 compatible regex catch-all
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "../dist", "index.html"));
-});
-
-/* ----------------------------------------------------
    Start Server
 ---------------------------------------------------- */
 app.listen(port, () => {
-  console.log(`🚀 Trishuvaan fullstack app running on port ${port}`);
+  console.log(`🚀 Trishuvaan backend running on port ${port}`);
 });

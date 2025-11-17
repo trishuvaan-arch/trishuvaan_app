@@ -23,7 +23,6 @@ const CourseDetail = () => {
   const [activeTab, setActiveTab] = useState<'about' | 'curriculum' | 'faqs'>('about');
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [whatsappLink, setWhatsappLink] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -88,12 +87,13 @@ const CourseDetail = () => {
             const res = await axios.post(`${API_BASE}/api/verify-payment`, verifyData);
 
             // Step 4️⃣ Show Success Modal
-            if (res.data.whatsapp_invite) {
-              setWhatsappLink(res.data.whatsapp_invite);
+            if (res.data.success) {
+              setShowEnrollModal(false);
+              setShowSuccessModal(true);
+              setFormData({ name: '', email: '', mobile: '', language: 'English' });
+            } else {
+              alert('Payment verified but something went wrong.');
             }
-            setShowEnrollModal(false);
-            setShowSuccessModal(true);
-            setFormData({ name: '', email: '', mobile: '', language: 'English' });
           } catch (error) {
             console.error('❌ verify-payment error:', error);
             alert('Payment verified, but enrollment could not be saved. Please contact support.');
@@ -318,7 +318,7 @@ const CourseDetail = () => {
         </div>
       )}
 
-      {/* ✅ Success Modal */}
+      {/* ✅ Success Modal (Simplified — no WhatsApp link) */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <motion.div
@@ -332,16 +332,6 @@ const CourseDetail = () => {
             <p className="text-gray-700 mb-4">
               Thank you for enrolling in <strong>{course.title}</strong>.
             </p>
-            {whatsappLink && (
-              <a
-                href={whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-violet-600 underline mb-4"
-              >
-                👉 Join WhatsApp Group
-              </a>
-            )}
             <GlowButton onClick={() => setShowSuccessModal(false)}>Close</GlowButton>
           </motion.div>
         </div>
