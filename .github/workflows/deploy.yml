@@ -13,33 +13,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # ---------------- FRONTEND BUILD ----------------
+      # ---------- FRONTEND ----------
       - name: Install & Build Frontend
         run: |
           npm install
           npm run build
 
-      # Zip frontend build folder
       - name: Zip Frontend Build
-        run: zip -r dist.zip dist/
+        run: zip -r frontend.zip dist/
 
-      # ---------------- BACKEND BUILD ----------------
-      - name: Zip Backend Folder
+      # ---------- BACKEND ----------
+      - name: Zip Backend
         run: |
           cd server
-          zip -r server.zip .
+          zip -r backend.zip .
 
-      # ---------------- COPY FILES TO VPS ----------------
-      - name: Upload build artifacts to VPS
+      # ---------- SEND FILES ----------
+      - name: Upload to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "dist.zip, server/server.zip"
+          source: "frontend.zip, server/backend.zip"
           target: "~/ci_cd_uploads"
 
-      # ---------------- RUN DEPLOY SCRIPT ON VPS ----------------
+      # ---------- DEPLOY ON VPS ----------
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -47,25 +46,30 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "📦 Starting Deployment..."
+            echo "🚀 Starting Deployment"
 
             cd ~/ci_cd_uploads
 
-            echo "🟣 Extracting Frontend Build..."
-            unzip -o dist.zip -d ~/trishuvaan_app/frontend_tmp
-            sudo rm -rf /var/www/myapp/*
-            sudo cp -r ~/trishuvaan_app/frontend_tmp/dist/* /var/www/myapp/
+            # ----- FRONTEND -----
+            echo "🟣 Deploying Frontend"
+            rm -rf ~/frontend_tmp
+            mkdir ~/frontend_tmp
+            unzip -o frontend.zip -d ~/frontend_tmp
 
-            echo "🟢 Extracting Backend..."
-            unzip -o server.zip -d ~/trishuvaan_app/server
+            sudo rm -rf /var/www/myapp/*
+            sudo cp -r ~/frontend_tmp/dist/* /var/www/myapp/
+
+            # ----- BACKEND -----
+            echo "🟢 Deploying Backend"
+            rm -rf ~/trishuvaan_app/server/*
+            unzip -o backend.zip -d ~/trishuvaan_app/server
 
             cd ~/trishuvaan_app/server
-            npm install --production
+            npm install   # not --production
 
-            echo "🔁 Restarting PM2 backend..."
             pm2 restart backend || pm2 start index.js --name backend
 
-            echo "🌐 Reloading Nginx..."
+            echo "🔁 Reloading Nginx..."
             sudo systemctl reload nginx
 
-            echo "🎉 Deployment Successful!"
+            echo "🎉 Deployment Complete!"
