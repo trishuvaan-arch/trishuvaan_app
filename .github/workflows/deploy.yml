@@ -10,11 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ---------- CHECKOUT ----------
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # ---------- FRONTEND ----------
+      # ---------- FRONTEND BUILD ----------
       - name: Install & Build Frontend
+        env:
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_RAZORPAY_KEY_ID: ${{ secrets.VITE_RAZORPAY_KEY_ID }}
         run: |
           npm install
           npm run build
@@ -22,13 +28,13 @@ jobs:
       - name: Zip Frontend Build
         run: zip -r frontend.zip dist/
 
-      # ---------- BACKEND ----------
+      # ---------- BACKEND ZIP ----------
       - name: Zip Backend
         run: |
           cd server
           zip -r backend.zip .
 
-      # ---------- SEND FILES ----------
+      # ---------- UPLOAD FILES TO VPS ----------
       - name: Upload to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -50,26 +56,43 @@ jobs:
 
             cd ~/ci_cd_uploads
 
-            # ----- FRONTEND -----
+            # ---------- FRONTEND DEPLOY ----------
             echo "🟣 Deploying Frontend"
             rm -rf ~/frontend_tmp
             mkdir ~/frontend_tmp
+
             unzip -o frontend.zip -d ~/frontend_tmp
 
             sudo rm -rf /var/www/myapp/*
             sudo cp -r ~/frontend_tmp/dist/* /var/www/myapp/
 
-            # ----- BACKEND -----
+            # ---------- BACKEND DEPLOY ----------
             echo "🟢 Deploying Backend"
-            rm -rf ~/trishuvaan_app/server/*
+
+            # Backup .env (if exists)
+            if [ -f ~/trishuvaan_app/server/.env ]; then
+              cp ~/trishuvaan_app/server/.env ~/env_backup
+            fi
+
+            # Clean server folder safely
+            rm -rf ~/trishuvaan_app/server
+            mkdir ~/trishuvaan_app/server
+
+            # Extract backend code
             unzip -o backend.zip -d ~/trishuvaan_app/server
 
-            cd ~/trishuvaan_app/server
-            npm install   # not --production
+            # Restore .env
+            if [ -f ~/env_backup ]; then
+              mv ~/env_backup ~/trishuvaan_app/server/.env
+            fi
 
+            cd ~/trishuvaan_app/server
+            npm install
+
+            echo "🔁 Restarting PM2 backend..."
             pm2 restart backend || pm2 start index.js --name backend
 
-            echo "🔁 Reloading Nginx..."
+            echo "🌐 Reloading Nginx..."
             sudo systemctl reload nginx
 
             echo "🎉 Deployment Complete!"
