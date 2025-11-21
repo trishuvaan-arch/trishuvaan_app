@@ -14,20 +14,19 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 /* ----------------------------------------------------
-   ✅ CORS Configuration (Allow domain + IP)
+   CORS Allowed Origins
 ---------------------------------------------------- */
 const allowedOrigins = [
   "http://68.178.160.4",
   "https://68.178.160.4",
   "https://trishuvaan.com",
   "https://www.trishuvaan.com",
-  "http://localhost:5173" // optional for local dev
+  "http://localhost:5173"
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow REST tools (curl/Postman) without Origin header
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
       console.warn(`🚫 Blocked by CORS: ${origin}`);
@@ -42,11 +41,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* ----------------------------------------------------
-   File Upload Configuration (Multer)
+   Multer Upload Config
 ---------------------------------------------------- */
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 /* ----------------------------------------------------
@@ -58,11 +57,10 @@ const razorpay = new Razorpay({
 });
 
 /* ----------------------------------------------------
-   Google Sheets Helper
+   Google Sheet Helper
 ---------------------------------------------------- */
 async function appendToSheet(sheetName, valuesObject, headerValues = []) {
   try {
-    console.log(`🟢 Writing to sheet: ${sheetName}`);
     const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
     const authClient = new JWT({
       email: creds.client_email,
@@ -75,19 +73,16 @@ async function appendToSheet(sheetName, valuesObject, headerValues = []) {
 
     let sheet = doc.sheetsByTitle[sheetName];
     if (!sheet) {
-      console.log(`🆕 Creating new sheet '${sheetName}'`);
       sheet = await doc.addSheet({ title: sheetName, headerValues });
     } else {
       try {
         await sheet.loadHeaderRow();
       } catch {
-        console.warn(`⚠️ No headers found in '${sheetName}', setting new ones...`);
         await sheet.setHeaderRow(headerValues);
       }
     }
 
     await sheet.addRow(valuesObject);
-    console.log(`✅ Row added successfully to Google Sheet [${sheetName}]`);
     return true;
   } catch (err) {
     console.error(`❌ appendToSheet error (${sheetName}):`, err);
@@ -96,15 +91,10 @@ async function appendToSheet(sheetName, valuesObject, headerValues = []) {
 }
 
 /* ----------------------------------------------------
-   Google Drive Helper — Upload Resume
+   Google Drive - Resume Upload
 ---------------------------------------------------- */
 async function uploadToDrive(file) {
   try {
-    console.log("📤 Uploading file to Google Drive:", file.originalname);
-
-    if (!process.env.GOOGLE_DRIVE_FOLDER_ID)
-      throw new Error("GOOGLE_DRIVE_FOLDER_ID not found in .env");
-
     const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
     const auth = new google.auth.JWT({
       email: creds.client_email,
@@ -131,6 +121,7 @@ async function uploadToDrive(file) {
     });
 
     const fileId = response.data.id;
+
     await drive.permissions.create({
       fileId,
       requestBody: { role: "reader", type: "anyone" },
@@ -141,41 +132,34 @@ async function uploadToDrive(file) {
       fields: "webViewLink",
     });
 
-    console.log("✅ File uploaded successfully:", data.webViewLink);
     return data.webViewLink;
   } catch (err) {
-    console.error("❌ uploadToDrive error:", err.response?.data || err.message);
+    console.error("❌ uploadToDrive error:", err);
     return "Upload Failed";
   }
 }
 
 /* ----------------------------------------------------
-   WhatsApp Invite Helper
+   WhatsApp Group Helper
 ---------------------------------------------------- */
 function getWhatsAppInviteMessage(name, groupId) {
-  let inviteLink;
+  let invite;
   switch (groupId) {
-    case "AI": inviteLink = process.env.WHATSAPP_AI_COURSE; break;
-    case "POWERBI": inviteLink = process.env.WHATSAPP_POWERBI; break;
-    case "SQL": inviteLink = process.env.WHATSAPP_SQL; break;
-    case "PYTHON": inviteLink = process.env.WHATSAPP_PYTHON; break;
-    case "EXCEL": inviteLink = process.env.WHATSAPP_EXCEL; break;
-    case "DATAVERSE": inviteLink = process.env.WHATSAPP_DATAVERSE; break;
-    case "AI_FUSION": inviteLink = process.env.WHATSAPP_AI_FUSION; break;
-    default: inviteLink = process.env.WHATSAPP_AI_COURSE;
+    case "AI": invite = process.env.WHATSAPP_AI_COURSE; break;
+    case "POWERBI": invite = process.env.WHATSAPP_POWERBI; break;
+    case "SQL": invite = process.env.WHATSAPP_SQL; break;
+    case "PYTHON": invite = process.env.WHATSAPP_PYTHON; break;
+    case "EXCEL": invite = process.env.WHATSAPP_EXCEL; break;
+    case "DATAVERSE": invite = process.env.WHATSAPP_DATAVERSE; break;
+    case "AI_FUSION": invite = process.env.WHATSAPP_AI_FUSION; break;
+    default: invite = process.env.WHATSAPP_AI_COURSE;
   }
 
-  return `👋 Hi ${name || "Learner"}!
-
-Thank you for joining our community.  
-You can now join your WhatsApp Group using this link:  
-${inviteLink}
-
-Stay connected and keep learning! 🚀`;
+  return `👋 Hi ${name}!\n\nWelcome to Trishuvaan 🎓\nJoin your WhatsApp group:\n${invite}\n\nLet’s begin your AI journey! 🚀`;
 }
 
 /* ----------------------------------------------------
-   💼 API: Internship / Job Application
+   Apply API
 ---------------------------------------------------- */
 app.post("/api/apply", upload.single("resume"), async (req, res) => {
   try {
@@ -186,7 +170,7 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
     if (resume) resumeLink = await uploadToDrive(resume);
 
     const timestamp = new Date().toLocaleString();
-    const sheetRow = {
+    const row = {
       Timestamp: timestamp,
       Name: name,
       Email: email,
@@ -196,84 +180,82 @@ app.post("/api/apply", upload.single("resume"), async (req, res) => {
       Status: resumeLink === "Upload Failed" ? "UPLOAD FAILED" : "RECEIVED",
     };
 
-    const success = await appendToSheet("applications", sheetRow, [
-      "Timestamp", "Name", "Email", "Mobile", "Position", "Resume", "Status",
+    await appendToSheet("applications", row, [
+      "Timestamp","Name","Email","Mobile","Position","Resume","Status",
     ]);
 
-    if (!success) throw new Error("Failed to write to applications sheet");
-
-    const whatsappMessage = getWhatsAppInviteMessage(name, "AI");
-
-    res.json({
-      success: true,
-      message: "Application submitted successfully!",
-      whatsapp_invite: whatsappMessage,
-    });
+    res.json({ success: true });
   } catch (err) {
-    console.error("🔥 /api/apply error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
 /* ----------------------------------------------------
-   📩 API: Contact Form
+   Contact Form API
 ---------------------------------------------------- */
 app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
-    if (!name || !email || !message)
-      return res.status(400).json({ success: false, message: "All fields are required" });
 
     const timestamp = new Date().toLocaleString();
-    const row = { Timestamp: timestamp, Name: name, Email: email, Message: message, Status: "NEW" };
+    const row = {
+      Timestamp: timestamp,
+      Name: name,
+      Email: email,
+      Message: message,
+      Status: "NEW",
+    };
 
-    const success = await appendToSheet("contacts", row, [
-      "Timestamp", "Name", "Email", "Message", "Status",
+    await appendToSheet("contacts", row, [
+      "Timestamp","Name","Email","Message","Status",
     ]);
 
-    if (!success) throw new Error("Failed to write to contacts sheet");
-
-    res.json({ success: true, message: "Message received successfully" });
+    res.json({ success: true });
   } catch (err) {
-    console.error("❌ /api/contact error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
 /* ----------------------------------------------------
-   🚀 Razorpay: Create Order
+   Razorpay: Create Order
 ---------------------------------------------------- */
 app.post("/api/create-order", async (req, res) => {
   try {
     const { amount } = req.body;
-    if (!amount) return res.status(400).json({ success: false, message: "Amount required" });
 
-    const options = {
-      amount: Math.round(Number(amount) * 100),
+    const order = await razorpay.orders.create({
+      amount: Number(amount) * 100,
       currency: "INR",
       receipt: "rcpt_" + Date.now(),
-      payment_capture: 1,
-    };
+    });
 
-    const order = await razorpay.orders.create(options);
-    console.log("✅ Razorpay order created:", order.id);
     res.json({ success: true, order });
   } catch (err) {
-    console.error("❌ create-order error:", err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false });
   }
 });
 
 /* ----------------------------------------------------
-   ✅ Razorpay: Verify Payment + Save + WhatsApp Link
+   Razorpay Verify + Save Enrollment
+   🔥 UPDATED: Internship Added
 ---------------------------------------------------- */
 app.post("/api/verify-payment", async (req, res) => {
   try {
     const {
-      razorpay_order_id, razorpay_payment_id, razorpay_signature,
-      name, email, mobile, course, groupId, language, amount,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      name,
+      email,
+      mobile,
+      course,
+      groupId,
+      language,
+      internship,  // <---- NEW FIELD
+      amount,
     } = req.body;
 
+    // Verify Signature
     const expected = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -283,41 +265,42 @@ app.post("/api/verify-payment", async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid payment signature" });
 
     const timestamp = new Date().toLocaleString();
+
     const row = {
-      Timestamp: timestamp, Name: name, Email: email, Mobile: mobile,
-      Course: course, Language: language, PaymentId: razorpay_payment_id,
-      Amount: amount, Status: "SUCCESS (Auto Captured)",
+      Timestamp: timestamp,
+      Name: name,
+      Email: email,
+      Mobile: mobile,
+      Course: course,
+      Language: language,
+      Internship: internship || "No",   // <-- STORED HERE
+      PaymentId: razorpay_payment_id,
+      Amount: amount,
+      Status: "SUCCESS",
     };
 
-    const success = await appendToSheet("enrollments", row, [
-      "Timestamp","Name","Email","Mobile","Course","Language","PaymentId","Amount","Status",
+    await appendToSheet("enrollments", row, [
+      "Timestamp","Name","Email","Mobile","Course","Language","Internship","PaymentId","Amount","Status"
     ]);
 
-    if (!success) throw new Error("Failed to append to enrollments sheet");
+    const whatsapp = getWhatsAppInviteMessage(name, groupId);
 
-    const whatsappMessage = getWhatsAppInviteMessage(name, groupId || "AI");
-
-    res.json({
-      success: true,
-      message: "Payment verified and recorded",
-      whatsapp_invite: whatsappMessage,
-    });
+    res.json({ success: true, whatsapp_invite: whatsapp });
   } catch (err) {
-    console.error("❌ verify-payment error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
 /* ----------------------------------------------------
-   Health Check
+   HEALTH CHECK
 ---------------------------------------------------- */
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", message: "Trishuvaan API is running" });
+  res.json({ status: "ok" });
 });
 
 /* ----------------------------------------------------
-   Start Server
+   START SERVER
 ---------------------------------------------------- */
 app.listen(port, () => {
-  console.log(`🚀 Trishuvaan backend running on port ${port}`);
+  console.log(`🚀 Backend running on port ${port}`);
 });

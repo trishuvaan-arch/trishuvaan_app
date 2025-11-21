@@ -1,35 +1,66 @@
-import { motion } from 'framer-motion';
-import NeuralBackground from '../components/NeuralBackground';
-import { Target, Eye, Users, Lightbulb, Rocket, Award } from 'lucide-react';
+import { motion } from "framer-motion";
+import NeuralBackground from "../components/NeuralBackground";
+import { Target, Eye, Users, Lightbulb, Rocket, Award } from "lucide-react";
 
-const teamMembers = [
+// Images
+const OUR_STORY_IMAGE = "/images/who_we_are/our-story.jpg";
+const LEADER_IMAGE = "/images/who_we_are/leadership.jpg";
+
+// Team Members
+const leader = {
+  name: "Govind",
+  role: "AI Engineer (Team Lead)",
+  expertise:
+    "Artificial Intelligence, Machine Learning, Product Development",
+  image: LEADER_IMAGE,
+};
+
+const employees = [
   {
-    name: 'Govind',
-    role: 'AI Engineer',
-    expertise: 'Artificial Intelligence, Machine Learning, Product Development',
+    name: "Rohit Sharma",
+    role: "Backend Developer",
+    expertise: "Node.js, APIs, Databases",
+    image: "/images/who_we_are/employee1.jpg",
+  },
+  {
+    name: "Priya Nair",
+    role: "Data Analyst",
+    expertise: "Python, SQL, Visualization",
+    image: "/images/who_we_are/employee2.jpg",
+  },
+  {
+    name: "Sneha Reddy",
+    role: "ML Engineer",
+    expertise: "ML Models, Deep Learning, Automation",
+    image: "/images/who_we_are/employee3.jpg",
   },
 ];
 
+// Values Section Icons
 const values = [
   {
     icon: Lightbulb,
-    title: 'Innovation First',
-    description: 'We constantly push boundaries and explore new frontiers in AI technology.',
+    title: "Innovation First",
+    description:
+      "We constantly push boundaries and explore new frontiers in AI technology.",
   },
   {
     icon: Users,
-    title: 'Community Driven',
-    description: 'Building a strong community of AI enthusiasts, learners, and practitioners.',
+    title: "Community Driven",
+    description:
+      "Building a strong community of AI enthusiasts, learners, and practitioners.",
   },
   {
     icon: Rocket,
-    title: 'Rapid Execution',
-    description: 'From idea to implementation, we move fast and deliver exceptional results.',
+    title: "Rapid Execution",
+    description:
+      "From idea to implementation, we move fast and deliver exceptional results.",
   },
   {
     icon: Award,
-    title: 'Excellence Always',
-    description: 'We maintain the highest standards in everything we build and teach.',
+    title: "Excellence Always",
+    description:
+      "We maintain the highest standards in everything we build and teach.",
   },
 ];
 
@@ -38,6 +69,8 @@ const WhoWeAre = () => {
     <div className="min-h-screen py-20 relative">
       <NeuralBackground />
       <div className="container mx-auto px-4 relative z-10">
+        
+        {/* HEADER */}
         <motion.div
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -51,6 +84,102 @@ const WhoWeAre = () => {
           </p>
         </motion.div>
 
+        {/* 🔥 NEW CORPORATE INTRODUCTION */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="glass-effect rounded-2xl p-10 mb-20 leading-relaxed text-gray-700"
+        >
+          <h2 className="text-3xl font-bold mb-6 gradient-text">
+            Trishuvaan Pvt Ltd — The AI Product Company
+          </h2>
+
+          <p className="text-lg mb-4">
+            Trishuvaan Pvt Ltd is a deep-tech AI innovation and product
+            development company driven by engineers, researchers, and visionary
+            creators passionate about building the future of intelligent
+            technology.
+          </p>
+
+          <p className="text-lg mb-4">
+            We believe artificial intelligence should not remain a concept — it
+            should be a powerful tool that transforms businesses, industries,
+            and everyday life.
+          </p>
+
+          <p className="text-lg mb-4">
+            Our mission is to build next-gen AI systems that solve real
+            challenges, automate complex processes, and enable organizations to
+            operate smarter than ever before.
+          </p>
+
+          {/* What Defines Us */}
+          <h2 className="text-3xl font-bold mt-10 mb-4 gradient-text">
+            What Defines Us
+          </h2>
+
+          <ul className="list-disc pl-6 text-lg space-y-3">
+            <li>
+              <strong>Innovation First:</strong> We constantly push
+              technological boundaries, creating breakthrough AI products that
+              redefine what’s possible.
+            </li>
+            <li>
+              <strong>Real-World Impact:</strong> Every solution we build is
+              designed for real businesses, real customers, and real results —
+              not theoretical research.
+            </li>
+            <li>
+              <strong>Fast Execution:</strong> From ideation to deployment, we
+              move fast with a startup mindset and enterprise-grade precision.
+            </li>
+            <li>
+              <strong>Engineering Excellence:</strong> Our team follows
+              world-class engineering standards to deliver robust, scalable, and
+              reliable AI systems.
+            </li>
+          </ul>
+
+          {/* Vision */}
+          <h2 className="text-3xl font-bold mt-10 mb-4 gradient-text">
+            Our Vision
+          </h2>
+          <p className="text-lg mb-4">
+            To build India’s most powerful AI product ecosystem — enabling
+            companies to innovate faster, make smarter decisions, and unlock new
+            possibilities through intelligent automation.
+          </p>
+
+          {/* Mission */}
+          <h2 className="text-3xl font-bold mt-10 mb-4 gradient-text">
+            Our Mission
+          </h2>
+          <p className="text-lg mb-4">
+            To make AI accessible, practical, and transformational for every
+            business — from emerging startups to global enterprises.
+          </p>
+
+          {/* Identity */}
+          <h2 className="text-3xl font-bold mt-10 mb-4 gradient-text">
+            The Trishuvaan Identity
+          </h2>
+
+          <ul className="list-disc pl-6 text-lg space-y-2">
+            <li>A Product-Based AI Company</li>
+            <li>An AI Automation & Intelligence Provider</li>
+            <li>An Enterprise AI Engineering Partner</li>
+          </ul>
+
+          <p className="text-lg mt-4">
+            And along with these, we operate <strong>Trishuvaan EdTech</strong>{" "}
+            as a separate educational division — ensuring Google clearly
+            recognizes Trishuvaan Pvt Ltd as a software company, not a training
+            institute.
+          </p>
+        </motion.div>
+
+        {/* OUR STORY */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
@@ -58,73 +187,31 @@ const WhoWeAre = () => {
           className="glass-effect rounded-2xl p-12 mb-20"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <img
-                src="https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg"
-                alt="AI Innovation"
-                className="rounded-xl shadow-2xl"
-              />
-            </div>
+            <img
+              src={OUR_STORY_IMAGE}
+              className="rounded-xl shadow-2xl"
+              alt="Our Story"
+            />
+
             <div>
               <h2 className="text-3xl font-bold mb-6 gradient-text">Our Story</h2>
               <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-                Trishuvaan represents a revolution in Artificial Intelligence innovation. We believe
-                in building an AI-empowered generation capable of designing intelligent systems,
-                automating workflows, and driving innovation across industries.
+                Trishuvaan represents a revolution in Artificial Intelligence
+                innovation. We believe in building an AI-empowered generation
+                capable of designing intelligent systems and driving innovation
+                across industries.
               </p>
-              <p className="text-lg text-gray-700 mb-4 leading-relaxed">
-                Our team includes data scientists, developers, and educators shaping the future of
-                AI technology and education in India. We combine cutting-edge research with practical
-                implementation to create solutions that matter.
-              </p>
+
               <p className="text-lg text-gray-700 leading-relaxed">
-                From developing enterprise AI systems to training the next generation of AI professionals,
-                we're committed to making AI accessible, practical, and transformative.
+                Our team includes data scientists, developers, and engineers
+                shaping the future of AI technology. We combine cutting-edge
+                research with practical, real-world implementation.
               </p>
             </div>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
-          <motion.div
-            initial={{ x: -50, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
-            viewport={{ once: true }}
-            className="glass-effect rounded-2xl p-8"
-          >
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-violet-500 rounded-lg flex items-center justify-center mr-4">
-                <Eye className="text-white" size={24} />
-              </div>
-              <h2 className="text-3xl font-bold gradient-text">Vision</h2>
-            </div>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Empowering AI Talent for the Next Decade. We envision an India where every professional
-              has the skills and tools to leverage AI in their work, creating a nation of innovators
-              and problem solvers.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ x: 50, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
-            viewport={{ once: true }}
-            className="glass-effect rounded-2xl p-8"
-          >
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg flex items-center justify-center mr-4">
-                <Target className="text-white" size={24} />
-              </div>
-              <h2 className="text-3xl font-bold gradient-text">Mission</h2>
-            </div>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              AI for Everyone — Learning to Leading. We democratize AI education and create
-              practical, production-ready AI solutions that solve real-world problems. From
-              classroom to boardroom, we're making AI accessible.
-            </p>
-          </motion.div>
-        </div>
-
+        {/* VALUES */}
         <motion.div
           initial={{ y: 50, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -134,93 +221,84 @@ const WhoWeAre = () => {
           <h2 className="text-4xl font-bold text-center mb-12 gradient-text">
             Our Values
           </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
+            {values.map((value, i) => (
               <motion.div
-                key={index}
+                key={i}
                 initial={{ y: 50, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -10 }}
                 className="glass-effect rounded-xl p-6 text-center hover:shadow-2xl transition-all duration-300"
               >
-                <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-violet-500 rounded-full flex items-center justify-center glow-effect">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-violet-500 rounded-full mx-auto mb-4 flex items-center justify-center glow-effect">
                   <value.icon className="text-white" size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{value.title}</h3>
+                <h3 className="font-bold text-xl mb-2">{value.title}</h3>
                 <p className="text-gray-600">{value.description}</p>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
+        {/* TEAM GRID */}
         <motion.div
           initial={{ y: 50, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
+          className="mb-20"
         >
           <h2 className="text-4xl font-bold text-center mb-12 gradient-text">
-            Meet Our Leadership
+            Meet Our Team
           </h2>
-          <div className="flex justify-center">
-            {teamMembers.map((member, index) => (
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            
+            {/* LEADER */}
+            <motion.div
+              className="glass-effect rounded-2xl p-8 flex flex-col items-center col-span-1 lg:col-span-2"
+              initial={{ scale: 0.85, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              <div className="relative w-56 h-56 rounded-full overflow-hidden mb-6">
+                <img
+                  src={leader.image}
+                  alt={leader.name}
+                  className="w-full h-full object-cover rounded-full border-4 border-purple-500 shadow-xl"
+                />
+              </div>
+              <h3 className="text-3xl font-bold">{leader.name}</h3>
+              <p className="text-xl text-orange-600 font-semibold">{leader.role}</p>
+              <p className="text-gray-600 text-center mt-2">{leader.expertise}</p>
+            </motion.div>
+
+            {/* EMPLOYEES */}
+            {employees.map((emp, i) => (
               <motion.div
-                key={index}
-                initial={{ scale: 0.8, opacity: 0 }}
+                key={i}
+                initial={{ scale: 0.85, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: (i + 1) * 0.1 }}
                 viewport={{ once: true }}
-                className="glass-effect rounded-xl max-w-2xl hover:shadow-2xl transition-all duration-300 p-12"
+                className="glass-effect rounded-2xl p-6 flex flex-col items-center hover:shadow-xl transition-all"
               >
-                <div className="flex flex-col items-center">
-                  <div className="mb-8 relative w-64 h-72">
-                    <img
-                      src="https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=600"
-                      alt={member.name}
-                      className="w-full h-full object-cover shadow-2xl"
-                      style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
-                    />
-                  </div>
-                  <h3 className="text-3xl font-bold mb-2">{member.name}</h3>
-                  <p className="text-xl text-orange-600 font-semibold mb-4">{member.role}</p>
-                  <p className="text-gray-600 text-center">{member.expertise}</p>
+                <div className="w-40 h-40 rounded-full overflow-hidden mb-4 border-4 border-blue-500 shadow-lg">
+                  <img
+                    src={emp.image}
+                    alt={emp.name}
+                    className="w-full h-full object-cover rounded-full"
+                  />
                 </div>
+                <h3 className="text-xl font-bold">{emp.name}</h3>
+                <p className="text-blue-600 font-semibold">{emp.role}</p>
+                <p className="text-gray-600 text-center text-sm mt-2">
+                  {emp.expertise}
+                </p>
               </motion.div>
             ))}
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          whileInView={{ scale: 1, opacity: 1 }}
-          viewport={{ once: true }}
-          className="mt-20 glass-effect rounded-2xl p-12 text-center bg-gradient-to-br from-blue-50 to-violet-50"
-        >
-          <h2 className="text-3xl font-bold mb-4 gradient-text">
-            Join the AI Revolution
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-            Whether you're looking to learn, build, or innovate with AI, Trishuvaan is your
-            partner in the journey from learning to leading.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              href="/edtech"
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg font-semibold hover:shadow-xl transition-all glow-effect"
-            >
-              Explore Courses
-            </motion.a>
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              href="/careers"
-              className="px-8 py-4 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all"
-            >
-              Join Our Team
-            </motion.a>
           </div>
         </motion.div>
       </div>
