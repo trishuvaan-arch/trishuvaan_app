@@ -102,7 +102,7 @@ const CourseDetail = () => {
             if (res.data.success) {
               setShowEnrollModal(false);
               setShowSuccessModal(true);
-              setFormData({ name: '', email: '', mobile: '', language: 'English' });
+              setFormData({ name: '', email: '', mobile: '', language: 'Telugu' });
               setInternship('no');
             } else {
               alert('Payment verified but something went wrong.');
