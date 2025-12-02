@@ -69,7 +69,7 @@ const CourseDetail = () => {
       const orderRes = await axios.post(`${API_BASE}/api/create-order`, { amount: totalAmount });
       const { id: order_id } = orderRes.data.order;
 
-      const options = {
+      const options: any = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_demo',
         amount: totalAmount * 100,
         currency: 'INR',
@@ -78,7 +78,8 @@ const CourseDetail = () => {
         image: '/images/coursedetail/razorpay-banner.jpg',
         order_id,
 
-        handler: async function (response: any) {
+        // ✅ SUCCESS HANDLER (unchanged logic, just wrapped in try/catch)
+        handler: async (response: any) => {
           try {
             const verifyData = {
               razorpay_order_id: response.razorpay_order_id,
@@ -103,10 +104,42 @@ const CourseDetail = () => {
               setShowSuccessModal(true);
               setFormData({ name: '', email: '', mobile: '', language: 'English' });
               setInternship('no');
+            } else {
+              alert('Payment verified but something went wrong.');
             }
-          } catch {
+          } catch (err) {
+            console.error('❌ verify-payment error:', err);
             alert('Payment verified, but enrollment could not be saved.');
+          } finally {
+            setIsLoading(false);
           }
+        },
+
+        // ✅ LOG CANCELLED PAYMENT (popup closed)
+        modal: {
+          ondismiss: async () => {
+            try {
+              await axios.post(`${API_BASE}/api/verify-payment`, {
+                razorpay_order_id: order_id,
+                razorpay_payment_id: 'CANCELLED',
+                razorpay_signature: 'CANCELLED_CLIENT',
+
+                name: formData.name,
+                email: formData.email,
+                mobile: formData.mobile,
+
+                course: course.title,
+                language: formData.language,
+                internship: internship === 'yes' ? 'Yes' : 'No',
+                amount: totalAmount,
+                groupId: course.groupId || 'AI',
+              });
+            } catch (err) {
+              console.error('❌ Failed to log cancelled payment:', err);
+            } finally {
+              setIsLoading(false);
+            }
+          },
         },
 
         prefill: {
@@ -118,10 +151,41 @@ const CourseDetail = () => {
       };
 
       const razorpay = new window.Razorpay(options);
+
+      // ✅ LOG FAILED PAYMENTS (UPI declined / bank failed etc.)
+      razorpay.on('payment.failed', async (response: any) => {
+        try {
+          const failOrderId =
+            response?.error?.metadata?.order_id || order_id;
+          const failPaymentId =
+            response?.error?.metadata?.payment_id || 'FAILED';
+
+          await axios.post(`${API_BASE}/api/verify-payment`, {
+            razorpay_order_id: failOrderId,
+            razorpay_payment_id: failPaymentId,
+            razorpay_signature: 'FAILED_CLIENT',
+
+            name: formData.name,
+            email: formData.email,
+            mobile: formData.mobile,
+
+            course: course.title,
+            language: formData.language,
+            internship: internship === 'yes' ? 'Yes' : 'No',
+            amount: totalAmount,
+            groupId: course.groupId || 'AI',
+          });
+        } catch (err) {
+          console.error('❌ Failed to log failed payment:', err);
+        } finally {
+          setIsLoading(false);
+        }
+      });
+
       razorpay.open();
-    } catch {
+    } catch (err) {
+      console.error('❌ Payment initialization error:', err);
       alert('Payment initialization failed. Try again.');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -145,6 +209,7 @@ const CourseDetail = () => {
               <img
                 src={`/images/coursedetail/${course.slug}.jpg`}
                 className="w-full h-96 object-cover rounded-2xl shadow-2xl mb-8"
+                alt={course.title}
               />
 
               <h1 className="text-4xl md:text-5xl font-bold mb-4 gradient-text">{course.title}</h1>
@@ -294,6 +359,34 @@ const CourseDetail = () => {
                 )}
               </div>
 
+              {/* ✅ LANGUAGE SELECTION */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-2">Course Language</label>
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="language"
+                      value="English"
+                      checked={formData.language === 'English'}
+                      onChange={handleInputChange}
+                    />
+                    English
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="language"
+                      value="Telugu"
+                      checked={formData.language === 'Telugu'}
+                      onChange={handleInputChange}
+                    />
+                    Telugu
+                  </label>
+                </div>
+              </div>
+              
               {/* PRICE BOX — FULL WIDTH */}
               <div className="col-span-1 md:col-span-2 bg-gray-50 p-5 rounded-lg">
                 <div className="flex justify-between mb-2">
@@ -348,6 +441,7 @@ const CourseDetail = () => {
           </motion.div>
         </div>
       )}
+
     </div>
   );
 };
