@@ -29,7 +29,7 @@ const CourseDetail = () => {
     name: '',
     email: '',
     mobile: '',
-    language: 'English',
+    language: 'Telugu',
   });
 
   // Internship — only for AI Fusion Bootcamp
@@ -359,33 +359,6 @@ const CourseDetail = () => {
                 )}
               </div>
 
-              {/* ✅ LANGUAGE SELECTION */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-2">Course Language</label>
-                <div className="flex gap-6">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="language"
-                      value="English"
-                      checked={formData.language === 'English'}
-                      onChange={handleInputChange}
-                    />
-                    English
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="language"
-                      value="Telugu"
-                      checked={formData.language === 'Telugu'}
-                      onChange={handleInputChange}
-                    />
-                    Telugu
-                  </label>
-                </div>
-              </div>
               
               {/* PRICE BOX — FULL WIDTH */}
               <div className="col-span-1 md:col-span-2 bg-gray-50 p-5 rounded-lg">

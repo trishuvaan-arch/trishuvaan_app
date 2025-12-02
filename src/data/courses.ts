@@ -26,7 +26,7 @@ export const courses: Course[] = [
     originalPrice: '999',
     description: 'Practical AI Applications for Business, Marketing, and Tech Leaders',
     startDate: '20th Dec (10:30 AM)',
-    language: 'English',
+    language: 'Telugu',
     duration: '3 + Hours Live',
     mode: 'For First Batch Launching offer - 399/- only',
     seats: 'Limited seats/ Weekend only',
