@@ -193,7 +193,7 @@ export const courses: Course[] = [
     price: '7,999',
     originalPrice: '29,999',
     description: 'A complete, real-world Data Science journey — from raw data to predictive intelligence',
-    startDate: '22nd Dec - Weekdays (Mon to Fri)',
+    startDate: '19th Jan 2026 - Weekdays (Mon to Fri)',
     duration: '12 Weeks',
     mode: 'Live Online + Internship',
     seats: 'Limited Seats',
