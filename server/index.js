@@ -17,8 +17,6 @@ const port = process.env.PORT || 3001;
    CORS Allowed Origins
 ---------------------------------------------------- */
 const allowedOrigins = [
-  "http://68.178.160.4",
-  "https://68.178.160.4",
   "https://trishuvaan.com",
   "https://www.trishuvaan.com",
   "http://localhost:5173",
