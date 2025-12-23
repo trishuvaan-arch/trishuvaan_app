@@ -147,7 +147,7 @@ const CourseDetail = () => {
           email: formData.email,
           contact: formData.mobile,
         },
-        theme: { color: '#6366f1' },
+        theme: { color: '#6366f1' }, //this is new update
       };
 
       const razorpay = new window.Razorpay(options);
