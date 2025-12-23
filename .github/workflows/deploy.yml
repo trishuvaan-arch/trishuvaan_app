@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Deploy Trishuvaan to VPS
 
 on:
   push:
@@ -18,8 +18,6 @@ jobs:
       - name: Install & Build Frontend
         env:
           VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_RAZORPAY_KEY_ID: ${{ secrets.VITE_RAZORPAY_KEY_ID }}
         run: |
           npm install
@@ -34,7 +32,7 @@ jobs:
           cd server
           zip -r backend.zip .
 
-      # ---------- SEND FILES TO VPS ----------
+      # ---------- UPLOAD TO VPS ----------
       - name: Upload to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -42,7 +40,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "frontend.zip, server/backend.zip"
-          target: "~/ci_cd_uploads"
+          target: "/home/govind/ci_cd_uploads"
 
       # ---------- DEPLOY ON VPS ----------
       - name: Deploy on VPS
@@ -52,44 +50,42 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -e
             echo "🚀 Starting Deployment"
 
-            cd ~/ci_cd_uploads
+            cd /home/govind/ci_cd_uploads
 
-            # ---------- FRONTEND DEPLOY ----------
+            # ---------- FRONTEND ----------
             echo "🟣 Deploying Frontend"
-            rm -rf ~/frontend_tmp
-            mkdir ~/frontend_tmp
-            unzip -o frontend.zip -d ~/frontend_tmp
+            rm -rf /tmp/frontend_tmp
+            mkdir -p /tmp/frontend_tmp
+            unzip -o frontend.zip -d /tmp/frontend_tmp
 
-            sudo rm -rf /var/www/myapp/*
-            sudo cp -r ~/frontend_tmp/dist/* /var/www/myapp/
+            sudo rm -rf /var/www/trishuvaan/*
+            sudo cp -r /tmp/frontend_tmp/dist/* /var/www/trishuvaan/
 
-            # ---------- BACKEND DEPLOY ----------
+            # ---------- BACKEND ----------
             echo "🟢 Deploying Backend"
 
-            # Backup existing .env
-            if [ -f ~/trishuvaan_app/server/.env ]; then
-              cp ~/trishuvaan_app/server/.env ~/server_env_backup
+            mkdir -p /home/govind/trishuvaan_app/server
+
+            if [ -f /home/govind/trishuvaan_app/server/.env ]; then
+              cp /home/govind/trishuvaan_app/server/.env /tmp/server_env_backup
             fi
 
-            rm -rf ~/trishuvaan_app/server/*
-            
-            echo "📦 Extracting backend.zip"
-            unzip -o ~/ci_cd_uploads/server/backend.zip -d ~/trishuvaan_app/server
+            rm -rf /home/govind/trishuvaan_app/server/*
+            unzip -o /home/govind/ci_cd_uploads/server/backend.zip -d /home/govind/trishuvaan_app/server
 
-            # Restore .env
-            if [ -f ~/server_env_backup ]; then
-              mv ~/server_env_backup ~/trishuvaan_app/server/.env
+            if [ -f /tmp/server_env_backup ]; then
+              mv /tmp/server_env_backup /home/govind/trishuvaan_app/server/.env
             fi
 
-            cd ~/trishuvaan_app/server
-            npm install
+            cd /home/govind/trishuvaan_app/server
+            npm install --production
 
-            echo "🔁 Restarting PM2 Backend..."
             pm2 restart backend || pm2 start index.js --name backend
+            pm2 save
 
-            echo "🌐 Reloading Nginx..."
             sudo systemctl reload nginx
 
             echo "🎉 Deployment Complete!"
